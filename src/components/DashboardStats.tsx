@@ -105,6 +105,13 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
     return groups.filter((g, index) => index < 6 || g.count > 0);
   }, [runners]);
 
+  // 4. Calculate runners 40+ stats (Từ 40 tuổi trở lên)
+  const runners40Plus = useMemo(() => {
+    const count = runners.filter(r => r.tuoi >= 40).length;
+    const pct = totalRunners > 0 ? ((count / totalRunners) * 100).toFixed(1) : '0';
+    return { count, pct };
+  }, [runners, totalRunners]);
+
   // Theme colors for beautiful visual flow
   const PIE_COLORS = {
     'Nam': '#3b82f6',     // Blue
@@ -135,7 +142,7 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
   return (
     <div className="space-y-6">
       {/* Overview Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Total Runners Card */}
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
@@ -201,6 +208,28 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
             <UserSquare2 className="w-7 h-7" />
           </div>
         </motion.div>
+
+        {/* Age 40+ Stats Card */}
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+          className="bg-white p-6 rounded-2xl border border-slate-150 shadow-xs flex items-center justify-between hover:border-rose-200 hover:shadow-md transition-all duration-300"
+          id="stat-card-age-40plus"
+        >
+          <div>
+            <p className="text-sm font-sans font-medium text-slate-500 uppercase tracking-wider">Từ 40 tuổi trở lên</p>
+            <h3 className="text-4xl font-sans font-bold text-[#9a1d49] mt-1 tracking-tight">
+              {runners40Plus.count.toLocaleString()}
+            </h3>
+            <p className="text-xs text-rose-600 font-medium mt-2 flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-rose-500" /> Chiếm {runners40Plus.pct}% tổng số VĐV
+            </p>
+          </div>
+          <div className="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-[#9a1d49]">
+            <TrendingUp className="w-7 h-7" />
+          </div>
+        </motion.div>
       </div>
 
       {/* Grid of detailed Charts */}
@@ -221,17 +250,20 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
           
           <div className="h-64 mt-2 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={distanceStats} margin={{ top: 20, right: 10, left: -20, bottom: 5 }}>
+              <BarChart data={distanceStats} margin={{ top: 20, right: 25, left: 20, bottom: 15 }}>
                 <XAxis 
                   dataKey="name" 
                   tickLine={false} 
                   axisLine={false} 
                   className="font-sans text-xs text-slate-500 font-semibold"
+                  height={30}
+                  interval={0}
                 />
                 <YAxis 
                   tickLine={false} 
                   axisLine={false}
                   className="font-sans text-xs text-slate-500 font-semibold"
+                  width={65}
                 />
                 <Tooltip 
                   cursor={{ fill: '#f8fafc' }}
@@ -285,14 +317,22 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
 
           <div className="h-64 mt-2 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ageGroupStats} margin={{ top: 20, right: 10, left: -20, bottom: 5 }} layout="vertical">
-                <XAxis type="number" tickLine={false} axisLine={false} className="font-sans text-xs text-slate-500 font-semibold" />
+              <BarChart data={ageGroupStats} margin={{ top: 20, right: 30, left: 20, bottom: 20 }} layout="vertical">
+                <XAxis 
+                  type="number" 
+                  tickLine={false} 
+                  axisLine={false} 
+                  className="font-sans text-xs text-slate-500 font-semibold"
+                  height={30}
+                />
                 <YAxis 
                   dataKey="name" 
                   type="category" 
                   tickLine={false} 
                   axisLine={false}
                   className="font-sans text-xs text-slate-500 font-semibold"
+                  width={85}
+                  interval={0}
                 />
                 <Tooltip 
                   cursor={{ fill: '#f8fafc' }}
@@ -324,7 +364,7 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
                   className="w-2.5 h-2.5 rounded-full shrink-0" 
                   style={{ backgroundColor: BAR_COLORS[(index + 3) % BAR_COLORS.length] }} 
                 />
-                <span className="font-semibold">{item.name}:</span>
+                <span className="font-semibold whitespace-nowrap">{item.name}:</span>
                 <span className="text-slate-900 font-bold ml-auto">{item.count}</span>
               </div>
             ))}

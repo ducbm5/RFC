@@ -12,6 +12,7 @@ import {
 import { Runner } from './types';
 import DashboardStats from './components/DashboardStats';
 import RunnerSearch from './components/RunnerSearch';
+import GalaxyLogo from './components/GalaxyLogo';
 import { 
   Activity, 
   RefreshCw, 
@@ -20,7 +21,14 @@ import {
   Database,
   Search,
   CheckCircle,
-  HelpCircle
+  HelpCircle,
+  Lock,
+  Unlock,
+  KeyRound,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  LogOut
 } from 'lucide-react';
 
 export default function App() {
@@ -29,6 +37,20 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+
+  // Authorization states
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+  const [passwordInput, setPasswordInput] = useState<string>('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  // Check storage on boot
+  useEffect(() => {
+    const authState = localStorage.getItem('galaxy_run_authorized');
+    if (authState === 'true') {
+      setIsAuthorized(true);
+    }
+  }, []);
 
   // Load runner data
   const loadData = async (silent = false) => {
@@ -51,8 +73,122 @@ export default function App() {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (isAuthorized) {
+      loadData();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isAuthorized]);
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+    
+    if (passwordInput.trim() === 'SS26') {
+      setIsAuthorized(true);
+      localStorage.setItem('galaxy_run_authorized', 'true');
+    } else {
+      setPasswordError('Mật khẩu không chính xác. Vui lòng nhập lại!');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthorized(false);
+    setPasswordInput('');
+    setPasswordError(null);
+    localStorage.removeItem('galaxy_run_authorized');
+  };
+
+  // 1. Authorization Lock Screen Render
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 selection:bg-rose-500 selection:text-white relative overflow-hidden" id="auth-root">
+        
+        {/* Ambient colored background blobs */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-rose-500/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none" />
+
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+          className="w-full max-w-md bg-white p-8 rounded-3xl border border-slate-150 shadow-2xl space-y-6 relative z-10"
+        >
+          {/* Logo element Centered */}
+          <div className="flex flex-col items-center text-center pb-2">
+            <GalaxyLogo size={1.1} className="mx-auto" />
+            <div className="h-0.5 bg-gradient-to-r from-rose-500 to-indigo-500 w-24 my-4 rounded-full" />
+            <h2 className="text-xl font-black font-display text-slate-800 tracking-tight">
+              Yêu cầu mật khẩu truy cập
+            </h2>
+            <p className="text-xs text-slate-400 mt-1 font-medium font-sans">
+              Galaxy Run live report
+            </p>
+          </div>
+
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Mật khẩu hệ thống</label>
+              
+              <div className="relative flex items-center">
+                <input 
+                  type={showPassword ? 'text' : 'password'}
+                  value={passwordInput}
+                  onChange={(e) => {
+                    setPasswordInput(e.target.value);
+                    if (passwordError) setPasswordError(null);
+                  }}
+                  placeholder="Nhập mật khẩu truy cập..."
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 pl-11 pr-11 py-3.5 rounded-2xl font-mono text-sm focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 focus:bg-white transition-all font-semibold"
+                  autoFocus
+                />
+                <KeyRound className="absolute left-4 w-5 h-5 text-slate-400" />
+                
+                {/* View toggle password */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 p-1 rounded-lg hover:bg-slate-250/50 cursor-pointer text-slate-400 hover:text-slate-600 transition-colors"
+                  title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Error dialog message */}
+            <AnimatePresence mode="wait">
+              {passwordError && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="flex items-center gap-2 bg-rose-50 border border-rose-100 text-rose-700 p-3 rounded-xl text-xs font-semibold"
+                >
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+                  <span>{passwordError}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Submit Trigger Action */}
+            <button 
+              type="submit"
+              className="w-full py-4 bg-[#9a1d49] hover:bg-[#80143a] text-white font-sans font-bold text-sm tracking-wide rounded-2xl transition-all hover:shadow-lg hover:shadow-rose-900/10 active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
+            >
+              <Lock className="w-4 h-4" />
+              <span>Xác nhận mật khẩu</span>
+            </button>
+          </form>
+
+          {/* Hint Footer tag */}
+          <div className="text-[10px] text-center text-slate-400 font-semibold uppercase tracking-widest pt-2 border-t border-slate-50">
+            Hộ tống giải chạy danh giá 2026
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased selection:bg-rose-500 selection:text-white" id="main-root">
@@ -64,14 +200,13 @@ export default function App() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             
             {/* Logo block */}
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-linear-to-tr from-rose-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-md shadow-rose-500/20">
-                <Activity className="w-6 h-6 animate-pulse" />
-              </div>
-              <div>
-                <span className="text-xs font-black tracking-widest text-rose-500 uppercase font-display block">SMR DASHBOARD</span>
-                <h1 className="text-2xl font-black font-display text-slate-900 tracking-tight flex items-center gap-2">
-                  Hệ thống Thống kê & Tra cứu VĐV
+            <div className="flex items-center gap-4">
+              <GalaxyLogo />
+              <div className="h-8 w-px bg-slate-200 hidden sm:block" />
+              <div className="hidden sm:block text-left">
+                <span className="text-xs font-black tracking-widest text-[#9a1d49] uppercase font-display block">LIVE REPORT</span>
+                <h1 className="text-xl font-black font-display text-slate-900 tracking-tight">
+                  Galaxy Run live report.
                 </h1>
               </div>
             </div>
@@ -95,6 +230,16 @@ export default function App() {
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
                 <span>{isRefreshing ? 'Đang đồng bộ...' : 'Làm mới'}</span>
+              </button>
+
+              {/* Guard Logout button */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 px-3.5 rounded-xl border border-slate-250 transition-all cursor-pointer shadow-xs"
+                title="Đăng xuất khỏi hệ thống report"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Đăng xuất</span>
               </button>
             </div>
 
