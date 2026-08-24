@@ -241,79 +241,99 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
         </motion.div>
       </div>
 
-      {/* Grid of detailed Charts */}
+      {/* Grid of detailed Charts: Gender Demographics & Age Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Distance Distribution Bar Chart */}
+        {/* Gender Demographics Box (Replacing Distance Box) */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
           className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex flex-col hover:shadow-md transition-shadow duration-300"
-          id="chart-distance-container"
+          id="chart-gender-container"
         >
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-2.5 h-6 bg-indigo-500 rounded-full" />
-            <h4 className="text-lg font-sans font-bold text-slate-850">Cự ly đăng ký (Runner / Cự ly)</h4>
+            <div className="w-2.5 h-6 bg-pink-500 rounded-full" />
+            <h4 className="text-lg font-sans font-bold text-slate-850">Cơ cấu Giới tính</h4>
           </div>
-          
-          <div className="h-64 mt-2 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={distanceStats} margin={{ top: 20, right: 25, left: 20, bottom: 15 }}>
-                <XAxis 
-                  dataKey="name" 
-                  tickLine={false} 
-                  axisLine={false} 
-                  className="font-sans text-xs text-slate-500 font-semibold"
-                  height={30}
-                  interval={0}
-                />
-                <YAxis 
-                  tickLine={false} 
-                  axisLine={false}
-                  className="font-sans text-xs text-slate-500 font-semibold"
-                  width={65}
-                />
-                <Tooltip 
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ 
-                    border: '1px solid #f1f5f9', 
-                    borderRadius: '12px', 
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                    fontFamily: 'Inter, sans-serif'
-                  }}
-                  formatter={(value, name, props) => {
-                    const pct = props.payload?.percentage;
-                    return [`${Number(value).toLocaleString()} Runner ${pct ? `(${pct}%)` : ''}`, 'Số lượng'];
-                  }}
-                />
-                <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={36}>
-                  {distanceStats.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={BAR_COLORS[index % BAR_COLORS.length]} 
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          
-          {/* Legend Table */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-50 text-xs">
-            {distanceStats.map((item, index) => (
-              <div key={item.name} className="flex items-center gap-2 text-slate-600 bg-slate-50/60 py-2 px-3 rounded-lg border border-slate-100/50">
-                <span 
-                  className="w-2.5 h-2.5 rounded-full shrink-0" 
-                  style={{ backgroundColor: BAR_COLORS[index % BAR_COLORS.length] }} 
-                />
-                <span className="font-semibold">{item.name}:</span>
-                <span className="text-slate-900 font-bold ml-auto flex items-center gap-1">
-                  {item.count.toLocaleString()}
-                  <span className="text-[10px] text-slate-400 font-normal">({item.percentage}%)</span>
+
+          <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-2">
+            {/* Pie Chart Representation */}
+            <div className="h-52 w-52 shrink-0 flex items-center justify-center relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Tooltip 
+                    contentStyle={{ 
+                      border: '1px solid #f1f5f9', 
+                      borderRadius: '12px', 
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                      fontFamily: 'Inter, sans-serif'
+                    }}
+                    formatter={(value, name) => [`${value} Runner`, `${name}`]}
+                  />
+                  <Pie
+                    data={genderStats}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="count"
+                  >
+                    {genderStats.map((entry) => (
+                      <Cell 
+                        key={`cell-${entry.name}`} 
+                        fill={PIE_COLORS[entry.name as keyof typeof PIE_COLORS] || '#64748b'} 
+                      />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              
+              {/* Center stat summary */}
+              <div className="absolute flex flex-col items-center justify-center text-center">
+                <span className="text-xs font-medium text-slate-400">Tỷ lệ chính</span>
+                <span className="text-xl font-bold text-slate-850">
+                  {genderStats.length > 0 ? `${genderStats.reduce((max, cur) => cur.count > max.count ? cur : max, genderStats[0]).percentage}%` : 'N/A'}
+                </span>
+                <span className="text-[11px] font-semibold text-slate-500">
+                  {genderStats.length > 0 ? genderStats.reduce((max, cur) => cur.count > max.count ? cur : max, genderStats[0]).name : ''}
                 </span>
               </div>
-            ))}
+            </div>
+
+            {/* Structured Stats Side Deck */}
+            <div className="space-y-3 flex-1 w-full">
+              {genderStats.map((item) => {
+                const color = PIE_COLORS[item.name as keyof typeof PIE_COLORS] || '#64748b';
+                return (
+                  <div key={item.name} className="space-y-1.5 p-2.5 rounded-xl border border-slate-100 hover:bg-slate-50/50 transition-colors duration-200">
+                    <div className="flex justify-between text-xs font-semibold">
+                      <div className="flex items-center gap-2 text-slate-700">
+                        <span 
+                          className="w-2.5 h-2.5 rounded-full shrink-0" 
+                          style={{ backgroundColor: color }} 
+                        />
+                        <span>Runner {item.name}</span>
+                      </div>
+                      <div className="text-slate-900">
+                        {item.count.toLocaleString()} <span className="text-[10px] text-slate-400 font-normal">({item.percentage}%)</span>
+                      </div>
+                    </div>
+                    {/* Linear progress bar */}
+                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                      <div 
+                        className="h-full rounded-full transition-all duration-500 ease-out" 
+                        style={{ 
+                          backgroundColor: color, 
+                          width: `${item.percentage}%` 
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </motion.div>
 
@@ -389,99 +409,6 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
                 </span>
               </div>
             ))}
-          </div>
-        </motion.div>
-
-        {/* Gender Demographics (Col-span 100% on normal, styled with absolute layout elegance) */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex flex-col md:col-span-2 hover:shadow-md transition-shadow duration-300"
-          id="chart-gender-container"
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-2.5 h-6 bg-pink-500 rounded-full" />
-            <h4 className="text-lg font-sans font-bold text-slate-850">Cơ cấu Giới tính</h4>
-          </div>
-
-          <div className="flex flex-col md:flex-row items-center justify-around gap-6 py-4">
-            {/* Pie Chart Representation */}
-            <div className="h-56 w-56 shrink-0 flex items-center justify-center relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Tooltip 
-                    contentStyle={{ 
-                      border: '1px solid #f1f5f9', 
-                      borderRadius: '12px', 
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                      fontFamily: 'Inter, sans-serif'
-                    }}
-                    formatter={(value, name) => [`${value} Runner`, `${name}`]}
-                  />
-                  <Pie
-                    data={genderStats}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={65}
-                    outerRadius={85}
-                    paddingAngle={3}
-                    dataKey="count"
-                  >
-                    {genderStats.map((entry) => (
-                      <Cell 
-                        key={`cell-${entry.name}`} 
-                        fill={PIE_COLORS[entry.name as keyof typeof PIE_COLORS] || '#64748b'} 
-                      />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              
-              {/* Absoluted stat center-piece */}
-              <div className="absolute flex flex-col items-center justify-center text-center">
-                <span className="text-sm font-medium text-slate-400">Tỷ lệ chính</span>
-                <span className="text-2xl font-bold text-slate-850">
-                  {genderStats.length > 0 ? `${genderStats.reduce((max, cur) => cur.count > max.count ? cur : max, genderStats[0]).percentage}%` : 'N/A'}
-                </span>
-                <span className="text-xs font-semibold text-slate-500">
-                  {genderStats.length > 0 ? genderStats.reduce((max, cur) => cur.count > max.count ? cur : max, genderStats[0]).name : ''}
-                </span>
-              </div>
-            </div>
-
-            {/* Structured Stats Side Deck */}
-            <div className="space-y-4 flex-1 max-w-md w-full">
-              {genderStats.map((item) => {
-                const color = PIE_COLORS[item.name as keyof typeof PIE_COLORS] || '#64748b';
-                return (
-                  <div key={item.name} className="space-y-1.5 p-3 rounded-xl border border-slate-100 hover:bg-slate-50/50 transition-colors duration-200">
-                    <div className="flex justify-between text-sm font-semibold">
-                      <div className="flex items-center gap-2 text-slate-700">
-                        <span 
-                          className="w-3 h-3 rounded-full shrink-0" 
-                          style={{ backgroundColor: color }} 
-                        />
-                        <span>Runner {item.name}</span>
-                      </div>
-                      <div className="text-slate-900">
-                        {item.count} <span className="text-xs text-slate-400 font-normal">({item.percentage}%)</span>
-                      </div>
-                    </div>
-                    {/* Linear progress bar */}
-                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                      <div 
-                        className="h-full rounded-full transition-all duration-500 ease-out" 
-                        style={{ 
-                          backgroundColor: color, 
-                          width: `${item.percentage}%` 
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
           </div>
         </motion.div>
 

@@ -83,7 +83,7 @@ export default function App() {
     e.preventDefault();
     setPasswordError(null);
     
-    if (passwordInput.trim() === 'SS26') {
+    if (passwordInput.trim() === 'Rfc@') {
       setIsAuthorized(true);
       localStorage.setItem('galaxy_run_authorized', 'true');
     } else {
