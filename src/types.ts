@@ -6,6 +6,9 @@
 export interface Runner {
   userId: string;
   cuLy: string;
+  ten: string;
+  sdt: string;
+  cccd: string;
   gioiTinh: string;
   namSinh: number;
   tuoi: number;

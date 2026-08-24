@@ -71,8 +71,12 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
         return { name, count, num };
       })
       .sort((a, b) => a.num - b.num)
-      .map(({ name, count }) => ({ name, count }));
-  }, [runners]);
+      .map(({ name, count }) => ({
+        name,
+        count,
+        percentage: totalRunners > 0 ? ((count / totalRunners) * 100).toFixed(1) : '0'
+      }));
+  }, [runners, totalRunners]);
 
   // 3. Calculate Age groups
   const ageGroupStats = useMemo(() => {
@@ -102,8 +106,13 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
 
     // Always keep the main active brackets from 0 to 5 to avoid dynamic x/y axis jumping
     // Only exclude 'Không rõ' (index 6) if it has zero entries
-    return groups.filter((g, index) => index < 6 || g.count > 0);
-  }, [runners]);
+    return groups
+      .filter((g, index) => index < 6 || g.count > 0)
+      .map(g => ({
+        ...g,
+        percentage: totalRunners > 0 ? ((g.count / totalRunners) * 100).toFixed(1) : '0'
+      }));
+  }, [runners, totalRunners]);
 
   // 4. Calculate runners 40+ stats (Từ 40 tuổi trở lên)
   const runners40Plus = useMemo(() => {
@@ -273,7 +282,10 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
                     boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                     fontFamily: 'Inter, sans-serif'
                   }}
-                  formatter={(value) => [`${value} Runner`, 'Số lượng']}
+                  formatter={(value, name, props) => {
+                    const pct = props.payload?.percentage;
+                    return [`${Number(value).toLocaleString()} Runner ${pct ? `(${pct}%)` : ''}`, 'Số lượng'];
+                  }}
                 />
                 <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={36}>
                   {distanceStats.map((entry, index) => (
@@ -296,7 +308,10 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
                   style={{ backgroundColor: BAR_COLORS[index % BAR_COLORS.length] }} 
                 />
                 <span className="font-semibold">{item.name}:</span>
-                <span className="text-slate-900 font-bold ml-auto">{item.count}</span>
+                <span className="text-slate-900 font-bold ml-auto flex items-center gap-1">
+                  {item.count.toLocaleString()}
+                  <span className="text-[10px] text-slate-400 font-normal">({item.percentage}%)</span>
+                </span>
               </div>
             ))}
           </div>
@@ -342,7 +357,10 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
                     boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                     fontFamily: 'Inter, sans-serif'
                   }}
-                  formatter={(value) => [`${value} Runner`, 'Số lượng']}
+                  formatter={(value, name, props) => {
+                    const pct = props.payload?.percentage;
+                    return [`${Number(value).toLocaleString()} Runner ${pct ? `(${pct}%)` : ''}`, 'Số lượng'];
+                  }}
                 />
                 <Bar dataKey="count" radius={[0, 6, 6, 0]} barSize={20}>
                   {ageGroupStats.map((entry, index) => (
@@ -365,7 +383,10 @@ export default function DashboardStats({ runners }: DashboardStatsProps) {
                   style={{ backgroundColor: BAR_COLORS[(index + 3) % BAR_COLORS.length] }} 
                 />
                 <span className="font-semibold whitespace-nowrap">{item.name}:</span>
-                <span className="text-slate-900 font-bold ml-auto">{item.count}</span>
+                <span className="text-slate-900 font-bold ml-auto flex items-center gap-1">
+                  {item.count.toLocaleString()}
+                  <span className="text-[10px] text-slate-400 font-normal">({item.percentage}%)</span>
+                </span>
               </div>
             ))}
           </div>

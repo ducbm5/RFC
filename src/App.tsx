@@ -12,7 +12,6 @@ import {
 import { Runner } from './types';
 import DashboardStats from './components/DashboardStats';
 import RunnerSearch from './components/RunnerSearch';
-import GalaxyLogo from './components/GalaxyLogo';
 import { 
   Activity, 
   RefreshCw, 
@@ -114,15 +113,14 @@ export default function App() {
           transition={{ duration: 0.4, ease: 'easeOut' }}
           className="w-full max-w-md bg-white p-8 rounded-3xl border border-slate-150 shadow-2xl space-y-6 relative z-10"
         >
-          {/* Logo element Centered */}
+          {/* Lock Screen Header Centered */}
           <div className="flex flex-col items-center text-center pb-2">
-            <GalaxyLogo size={1.1} className="mx-auto" />
-            <div className="h-0.5 bg-gradient-to-r from-rose-500 to-indigo-500 w-24 my-4 rounded-full" />
+            <div className="h-1 bg-gradient-to-r from-rose-500 to-indigo-500 w-24 mb-4 rounded-full" />
             <h2 className="text-xl font-black font-display text-slate-800 tracking-tight">
               Yêu cầu mật khẩu truy cập
             </h2>
             <p className="text-xs text-slate-400 mt-1 font-medium font-sans">
-              Galaxy Run live report
+              Run For Children Live Report
             </p>
           </div>
 
@@ -199,14 +197,12 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 relative z-10">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             
-            {/* Logo block */}
-            <div className="flex items-center gap-4">
-              <GalaxyLogo />
-              <div className="h-8 w-px bg-slate-200 hidden sm:block" />
-              <div className="hidden sm:block text-left">
+            {/* Title block */}
+            <div className="flex items-center gap-3">
+              <div className="text-left">
                 <span className="text-xs font-black tracking-widest text-[#9a1d49] uppercase font-display block">LIVE REPORT</span>
-                <h1 className="text-xl font-black font-display text-slate-900 tracking-tight">
-                  Galaxy Run live report.
+                <h1 className="text-xl sm:text-2xl font-black font-display text-slate-900 tracking-tight">
+                  Run For Children Live Report
                 </h1>
               </div>
             </div>
@@ -349,11 +345,11 @@ export default function App() {
               {/* Visual separation */}
               <div className="border-t border-slate-200/80 my-8 pt-2" />
 
-              {/* Box 2 (Lookup details profile bib) - Centered layout */}
-              <div className="space-y-6 max-w-4xl mx-auto w-full">
+              {/* Box 2 (Lookup & Runner List) - Full width */}
+              <div className="space-y-6 w-full">
                 <div>
-                  <h3 className="text-base font-bold text-slate-400 font-display tracking-widest uppercase mb-1">BOX 2 // TRA CỨU</h3>
-                  <div className="h-0.5 bg-slate-200 w-16 mb-4 rounded-full" />
+                  <h3 className="text-base font-bold text-slate-400 font-display tracking-widest uppercase mb-1">BOX 2 // TRA CỨU & DANH SÁCH RUNNER</h3>
+                  <div className="h-0.5 bg-slate-200 w-24 mb-4 rounded-full" />
                 </div>
                 <RunnerSearch runners={runners} />
               </div>

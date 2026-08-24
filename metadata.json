@@ -1,5 +1,5 @@
 {
-  "name": "Galaxy Run live report",
+  "name": "Run For Children Live Report",
   "description": "Bảng điều khiển thống kê số lượng runner, cự ly, độ tuổi và tra cứu thông tin runner theo User ID.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

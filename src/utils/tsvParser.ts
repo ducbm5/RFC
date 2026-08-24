@@ -36,8 +36,11 @@ export function parseTSVData(tsvText: string): Runner[] {
   const headers = lines[0].split('\t').map(h => h.trim().toUpperCase());
   
   // Find column indices
-  const userIdx = headers.findIndex(h => h.includes('USER ID') || h.includes('ID') || h.includes('MÃ'));
+  const userIdx = headers.findIndex(h => h.includes('USER ID') || h.includes('USER_ID') || h.includes('ID') || h.includes('MÃ'));
   const cuLyIdx = headers.findIndex(h => h.includes('CU LY') || h.includes('CỰ LY') || h.includes('DISTANCE'));
+  const tenIdx = headers.findIndex(h => h.includes('TEN') || h.includes('TÊN') || h.includes('NAME') || h.includes('HỌ'));
+  const sdtIdx = headers.findIndex(h => h.includes('SĐT') || h.includes('SDT') || h.includes('PHONE') || h.includes('TEL') || h.includes('ĐIỆN THOẠI') || h.includes('DI ĐỘNG'));
+  const cccdIdx = headers.findIndex(h => h.includes('CCCD') || h.includes('CMND') || h.includes('CMT') || h.includes('CĂN CƯỚC'));
   const gioiTinhIdx = headers.findIndex(h => h.includes('GIOI TINH') || h.includes('GIỚI TÍNH') || h.includes('GENDER'));
   const namSinhIdx = headers.findIndex(h => h.includes('NAM SINH') || h.includes('NĂM SINH') || h.includes('BIRTH') || h.includes('YOB'));
   const tuoiIdx = headers.findIndex(h => h.includes('TUOI') || h.includes('TUỔI') || h.includes('AGE'));
@@ -55,6 +58,9 @@ export function parseTSVData(tsvText: string): Runner[] {
 
     const userId = userIdx !== -1 ? cols[userIdx]?.trim() : '';
     const cuLyRaw = cuLyIdx !== -1 ? cols[cuLyIdx]?.trim() : '';
+    const ten = tenIdx !== -1 ? cols[tenIdx]?.trim() : '';
+    const sdt = sdtIdx !== -1 ? cols[sdtIdx]?.trim() : '';
+    const cccd = cccdIdx !== -1 ? cols[cccdIdx]?.trim() : '';
     const gioiTinh = gioiTinhIdx !== -1 ? cols[gioiTinhIdx]?.trim() : '';
     const namSinhStr = namSinhIdx !== -1 ? cols[namSinhIdx]?.trim() : '';
     const tuoiStr = tuoiIdx !== -1 ? cols[tuoiIdx]?.trim() : '';
@@ -89,6 +95,9 @@ export function parseTSVData(tsvText: string): Runner[] {
     runners.push({
       userId,
       cuLy,
+      ten: ten || '—',
+      sdt: sdt || '—',
+      cccd: cccd || '—',
       gioiTinh: gioiTinh || 'Chưa rõ',
       namSinh,
       tuoi,
